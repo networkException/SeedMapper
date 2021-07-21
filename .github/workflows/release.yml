@@ -1,0 +1,23 @@
+name: Build and release jar
+on:
+    release:
+        types: [released]
+
+jobs:
+    build-and-release:
+        runs-on: ubuntu-latest
+        container: openjdk:16
+        steps:
+            - name: Checkout latest commit
+              uses: actions/checkout@v2
+              with:
+                  ref: ${{ github.event.pull_request.head.sha }}
+            - name: Build jar
+              run: ./gradlew remapJar
+            - name: Upload asset
+              uses: svenstaro/upload-release-action@v2
+              with:
+                  repo_token: ${{ secrets.GITHUB_TOKEN }}
+                  file: build/libs/*[^-dev].jar
+                  tag: ${{ github.ref }}
+                  file_glob: true
